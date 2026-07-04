@@ -172,15 +172,42 @@ select {
   padding: 0 10px;
 }
 
-.angle-input {
+.angle-control {
+  display: grid;
+  grid-template-columns: 52px minmax(64px, 1fr) minmax(64px, 1fr);
+  gap: 6px;
+}
+
+.angle-control select,
+.angle-control input {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #fff;
   color: var(--ink);
   height: 36px;
-  padding: 0 10px;
+  padding: 0 8px;
   font-variant-numeric: tabular-nums;
+}
+
+.angle-control label {
+  position: relative;
+  min-width: 0;
+}
+
+.angle-control label input {
+  padding-right: 24px;
+}
+
+.angle-control b {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #5d6470;
+  font-size: 12px;
+  font-weight: 780;
+  pointer-events: none;
 }
 
 button:focus-visible,
@@ -497,13 +524,18 @@ legend {
   font-weight: 780;
 }
 
-fieldset label {
+.angle-field {
   display: grid;
+  grid-column: 1 / -1;
   gap: 5px;
   align-content: start;
   color: var(--muted);
   font-size: 11px;
   font-weight: 740;
+}
+
+.angle-field > span {
+  display: block;
 }
 
 .calc-summary {
