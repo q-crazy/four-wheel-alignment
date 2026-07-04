@@ -1,3 +1,9 @@
+const calculatorPanel = document.querySelector(".calculator-panel");
+const workspacePanel = document.querySelector(".workspace");
+if (calculatorPanel && workspacePanel) {
+  workspacePanel.before(calculatorPanel);
+}
+
 const inputs = {
   preset: document.getElementById("presetSelect"),
   dmF: document.getElementById("dmF"),
@@ -78,18 +84,24 @@ let visual = { ...state };
 let phase = 0;
 
 function fmt(value, options = {}) {
-  const totalMinutes = Math.round(Number(value));
-  const normalized = Object.is(totalMinutes, -0) ? 0 : totalMinutes;
+  const minuteDigits = options.minuteDigits ?? 0;
+  const factor = 10 ** minuteDigits;
+  const rounded = Math.round(Number(value) * factor) / factor;
+  const normalized = Math.abs(rounded) < 0.5 / factor ? 0 : rounded;
   const sign = normalized < 0 ? "-" : options.forcePlus && normalized > 0 ? "+" : "";
   const absolute = Math.abs(normalized);
   const degrees = Math.floor(absolute / 60);
-  const minutes = String(absolute % 60).padStart(2, "0");
+  const minuteValue = absolute - degrees * 60;
+  const minutes =
+    minuteDigits > 0
+      ? minuteValue.toFixed(minuteDigits).padStart(3 + minuteDigits, "0")
+      : String(Math.round(minuteValue)).padStart(2, "0");
   return `${sign}${degrees}°${minutes}'`;
 }
 
 function fmtDelta(value) {
-  const normalized = Math.abs(value) < 0.5 ? 0 : value;
-  return fmt(normalized, { forcePlus: true });
+  const normalized = Math.abs(value) < 0.05 ? 0 : value;
+  return fmt(normalized, { forcePlus: true, minuteDigits: 1 });
 }
 
 function getAngleControl(id) {
@@ -245,16 +257,16 @@ function updateCalculator() {
     dC: fmt(dC),
     frontSplit: fmt(frontSplit),
     rearSplit: fmt(rearSplit),
-    targetFL: fmt(targetFL),
-    targetFR: fmt(targetFR),
-    targetRL: fmt(targetRL),
-    targetRR: fmt(targetRR),
+    targetFL: fmt(targetFL, { minuteDigits: 1 }),
+    targetFR: fmt(targetFR, { minuteDigits: 1 }),
+    targetRL: fmt(targetRL, { minuteDigits: 1 }),
+    targetRR: fmt(targetRR, { minuteDigits: 1 }),
     deltaFL: fmtDelta(targetFL - calc.toeFL),
     deltaFR: fmtDelta(targetFR - calc.toeFR),
     deltaRL: fmtDelta(targetRL - calc.toeRL),
     deltaRR: fmtDelta(targetRR - calc.toeRR),
   });
-  calculatorOutputs.status.textContent = "Targets use accepted split formulas; diagnostic rear term is excluded.";
+  calculatorOutputs.status.textContent = "Targets use accepted split formulas; target toe and adjustment use 0.1' precision.";
 }
 
 function updateOutputs() {
