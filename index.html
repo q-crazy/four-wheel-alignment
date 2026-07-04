@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Split-Toe Physical Simulator</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Toe / camber / caster</p>
+          <h1>Split-toe physical simulator</h1>
+        </div>
+        <div class="formula-badge" aria-label="Accepted formula family">
+          <span>Accepted model</span>
+          <strong>D = camber-thrust split + caster reference split</strong>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="Interactive split-toe simulator">
+        <aside class="panel controls-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Geometry inputs</p>
+              <h2>Degree-minute</h2>
+            </div>
+            <button class="icon-button" id="resetBtn" type="button" title="Reset to current geometry">
+              Reset
+            </button>
+          </div>
+
+          <label class="field">
+            <span>Preset</span>
+            <select id="presetSelect">
+              <option value="current">Current geometry, empirical totals</option>
+              <option value="measure3">Measurement 3</option>
+              <option value="group">Group-owner suggestion</option>
+              <option value="neutral">Neutral reference</option>
+            </select>
+          </label>
+
+          <div class="slider-group">
+            <label class="slider-row" for="dmF">
+              <span>dmF = m_FR - m_FL</span>
+              <output id="dmFValue"></output>
+            </label>
+            <input id="dmF" type="range" min="-32" max="32" step="0.5" />
+          </div>
+
+          <div class="slider-group">
+            <label class="slider-row" for="dmR">
+              <span>dmR = m_RR - m_RL</span>
+              <output id="dmRValue"></output>
+            </label>
+            <input id="dmR" type="range" min="-32" max="32" step="0.5" />
+          </div>
+
+          <div class="slider-group">
+            <label class="slider-row" for="dC">
+              <span>dC = C_FR - C_FL</span>
+              <output id="dCValue"></output>
+            </label>
+            <input id="dC" type="range" min="-18" max="18" step="0.5" />
+          </div>
+
+          <div class="slider-group">
+            <label class="slider-row" for="totalFront">
+              <span>Front total toe T_F</span>
+              <output id="totalFrontValue"></output>
+            </label>
+            <input id="totalFront" type="range" min="-4" max="24" step="0.5" />
+          </div>
+
+          <div class="slider-group">
+            <label class="slider-row" for="totalRear">
+              <span>Rear total toe T_R</span>
+              <output id="totalRearValue"></output>
+            </label>
+            <input id="totalRear" type="range" min="-4" max="28" step="0.5" />
+          </div>
+
+          <label class="toggle-row">
+            <input id="diagnosticToggle" type="checkbox" />
+            <span>
+              Rear dmF*dmR diagnostic
+              <small>Research-only residual, not accepted formula</small>
+            </span>
+          </label>
+        </aside>
+
+        <section class="simulation-panel" aria-label="Animated vehicle alignment simulation">
+          <div class="sim-header">
+            <div>
+              <p class="eyebrow">Animated balance</p>
+              <h2>Four-wheel toe response</h2>
+            </div>
+            <div class="legend" aria-label="Diagram legend">
+              <span><i class="swatch swatch-camber"></i>camber thrust</span>
+              <span><i class="swatch swatch-caster"></i>caster reference</span>
+              <span><i class="swatch swatch-toe"></i>target split toe</span>
+            </div>
+          </div>
+
+          <div class="canvas-frame">
+            <canvas id="carCanvas" aria-label="Top-down animated car alignment diagram"></canvas>
+          </div>
+
+          <div class="lower-visuals">
+            <div class="camber-frame">
+              <canvas id="camberCanvas" aria-label="Front-view camber magnitude diagram"></canvas>
+            </div>
+            <div class="balance-strip">
+              <div>
+                <span>frontP = dmF + dC</span>
+                <strong id="frontBalanceValue"></strong>
+              </div>
+              <div>
+                <span>rearP = dmR + dC</span>
+                <strong id="rearBalanceValue"></strong>
+              </div>
+              <div>
+                <span>Cancellation</span>
+                <strong id="cancelValue"></strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel results-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Formula output</p>
+              <h2>Toe targets</h2>
+            </div>
+          </div>
+
+          <div class="metric-grid">
+            <div class="metric">
+              <span>D_F accepted</span>
+              <strong id="frontSplitValue"></strong>
+            </div>
+            <div class="metric">
+              <span>D_R active</span>
+              <strong id="rearSplitValue"></strong>
+            </div>
+            <div class="metric subtle">
+              <span>D_F compact</span>
+              <strong id="frontCompactValue"></strong>
+            </div>
+            <div class="metric subtle">
+              <span>D_R compact</span>
+              <strong id="rearCompactValue"></strong>
+            </div>
+          </div>
+
+          <div class="toe-table" aria-label="Computed left and right toe">
+            <div class="toe-head">
+              <span>Wheel</span>
+              <span>Toe</span>
+            </div>
+            <div><span>Front L</span><strong id="frontLeftToe"></strong></div>
+            <div><span>Front R</span><strong id="frontRightToe"></strong></div>
+            <div><span>Rear L</span><strong id="rearLeftToe"></strong></div>
+            <div><span>Rear R</span><strong id="rearRightToe"></strong></div>
+          </div>
+
+          <div class="formula-stack">
+            <section>
+              <h3>Operational split</h3>
+              <code>D_F = 0.406*dmF + 0.354*dC</code>
+              <code>D_R = 0.367*dmR + 0.391*dC</code>
+            </section>
+            <section>
+              <h3>Compact physical form</h3>
+              <code>D_F = 0.390*(dmF + dC)</code>
+              <code>D_R = 0.376*(dmR + dC)</code>
+            </section>
+            <section class="warning-note" id="diagnosticNote">
+              <h3>Diagnostic-only rear term</h3>
+              <code>D_R = 0.356*(dmR + dC) + 0.00164*dmF*dmR</code>
+              <p>It improves preferred-set residuals but is mirror-even, so it can encode hidden reference bias instead of split-toe physics.</p>
+            </section>
+            <section>
+              <h3>Mirror check</h3>
+              <p id="mirrorCheck">Accepted split flips sign under left/right mirror; the diagnostic extra does not.</p>
+            </section>
+          </div>
+
+          <div class="physics-note">
+            <h3>Physical meaning</h3>
+            <p>
+              Camber creates lateral tire force. Toe is the small slip-angle correction that can counter a left-right camber-thrust imbalance. Caster enters as a steering-axis and straight-ahead reference bias, so the same dC term can move both axle split targets.
+            </p>
+            <p>
+              Camber-caster cancellation appears when dm and dC point in opposite signs: the tire-force imbalance and steering-reference imbalance partially subtract before the split-toe correction is calculated.
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="calculator-panel" aria-label="Adjustment toe calculator">
+        <div class="calculator-heading">
+          <div>
+            <p class="eyebrow">Adjustment calculator</p>
+            <h2>Measured geometry to toe targets</h2>
+          </div>
+          <p>All inputs and outputs use signed x°xx' values. Toe-in is positive.</p>
+        </div>
+
+        <div class="calculator-grid">
+          <div class="calc-inputs" aria-label="Measured alignment inputs">
+            <fieldset>
+              <legend>Front caster</legend>
+              <label>
+                <span>FL caster</span>
+                <input id="calcCasterFL" class="angle-input" type="text" inputmode="text" value="7°00'" />
+              </label>
+              <label>
+                <span>FR caster</span>
+                <input id="calcCasterFR" class="angle-input" type="text" inputmode="text" value="6°58'" />
+              </label>
+            </fieldset>
+
+            <fieldset>
+              <legend>Measured camber</legend>
+              <label>
+                <span>FL camber</span>
+                <input id="calcCamberFL" class="angle-input" type="text" inputmode="text" value="-0°38'" />
+              </label>
+              <label>
+                <span>FR camber</span>
+                <input id="calcCamberFR" class="angle-input" type="text" inputmode="text" value="-1°02'" />
+              </label>
+              <label>
+                <span>RL camber</span>
+                <input id="calcCamberRL" class="angle-input" type="text" inputmode="text" value="-0°51'" />
+              </label>
+              <label>
+                <span>RR camber</span>
+                <input id="calcCamberRR" class="angle-input" type="text" inputmode="text" value="-0°59'" />
+              </label>
+            </fieldset>
+
+            <fieldset>
+              <legend>Measured toe</legend>
+              <label>
+                <span>FL toe</span>
+                <input id="calcToeFL" class="angle-input" type="text" inputmode="text" value="0°08'" />
+              </label>
+              <label>
+                <span>FR toe</span>
+                <input id="calcToeFR" class="angle-input" type="text" inputmode="text" value="-0°02'" />
+              </label>
+              <label>
+                <span>RL toe</span>
+                <input id="calcToeRL" class="angle-input" type="text" inputmode="text" value="0°07'" />
+              </label>
+              <label>
+                <span>RR toe</span>
+                <input id="calcToeRR" class="angle-input" type="text" inputmode="text" value="0°04'" />
+              </label>
+            </fieldset>
+
+            <fieldset>
+              <legend>Target total toe</legend>
+              <label>
+                <span>Front total</span>
+                <input id="calcTargetFront" class="angle-input" type="text" inputmode="text" value="0°06'" />
+              </label>
+              <label>
+                <span>Rear total</span>
+                <input id="calcTargetRear" class="angle-input" type="text" inputmode="text" value="0°11'" />
+              </label>
+            </fieldset>
+          </div>
+
+          <div class="calc-summary" aria-label="Derived formula inputs">
+            <div class="metric">
+              <span>dmF = camber_FL - camber_FR</span>
+              <strong id="calcDmF"></strong>
+            </div>
+            <div class="metric">
+              <span>dmR = camber_RL - camber_RR</span>
+              <strong id="calcDmR"></strong>
+            </div>
+            <div class="metric">
+              <span>dC = caster_FR - caster_FL</span>
+              <strong id="calcDC"></strong>
+            </div>
+            <div class="metric subtle">
+              <span>D_F accepted</span>
+              <strong id="calcFrontSplit"></strong>
+            </div>
+            <div class="metric subtle">
+              <span>D_R accepted</span>
+              <strong id="calcRearSplit"></strong>
+            </div>
+            <p id="calcStatus">Ready.</p>
+          </div>
+
+          <div class="calc-output" aria-label="Adjusted toe output">
+            <div class="toe-table calc-table">
+              <div class="toe-head">
+                <span>Wheel</span>
+                <span>Target toe</span>
+                <span>Adjust by</span>
+              </div>
+              <div>
+                <span>Front L</span>
+                <strong id="calcTargetFL"></strong>
+                <strong id="calcDeltaFL"></strong>
+              </div>
+              <div>
+                <span>Front R</span>
+                <strong id="calcTargetFR"></strong>
+                <strong id="calcDeltaFR"></strong>
+              </div>
+              <div>
+                <span>Rear L</span>
+                <strong id="calcTargetRL"></strong>
+                <strong id="calcDeltaRL"></strong>
+              </div>
+              <div>
+                <span>Rear R</span>
+                <strong id="calcTargetRR"></strong>
+                <strong id="calcDeltaRR"></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
