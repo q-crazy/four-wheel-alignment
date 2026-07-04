@@ -30,18 +30,18 @@ const outputs = {
 };
 
 const calculatorInputs = {
-  casterFL: document.getElementById("calcCasterFL"),
-  casterFR: document.getElementById("calcCasterFR"),
-  camberFL: document.getElementById("calcCamberFL"),
-  camberFR: document.getElementById("calcCamberFR"),
-  camberRL: document.getElementById("calcCamberRL"),
-  camberRR: document.getElementById("calcCamberRR"),
-  toeFL: document.getElementById("calcToeFL"),
-  toeFR: document.getElementById("calcToeFR"),
-  toeRL: document.getElementById("calcToeRL"),
-  toeRR: document.getElementById("calcToeRR"),
-  targetFront: document.getElementById("calcTargetFront"),
-  targetRear: document.getElementById("calcTargetRear"),
+  casterFL: getAngleControl("calcCasterFL"),
+  casterFR: getAngleControl("calcCasterFR"),
+  camberFL: getAngleControl("calcCamberFL"),
+  camberFR: getAngleControl("calcCamberFR"),
+  camberRL: getAngleControl("calcCamberRL"),
+  camberRR: getAngleControl("calcCamberRR"),
+  toeFL: getAngleControl("calcToeFL"),
+  toeFR: getAngleControl("calcToeFR"),
+  toeRL: getAngleControl("calcToeRL"),
+  toeRR: getAngleControl("calcToeRR"),
+  targetFront: getAngleControl("calcTargetFront"),
+  targetRear: getAngleControl("calcTargetRear"),
 };
 
 const calculatorOutputs = {
@@ -92,43 +92,49 @@ function fmtDelta(value) {
   return fmt(normalized, { forcePlus: true });
 }
 
-function parseAngle(value) {
-  const text = value.trim();
-  if (!text) return null;
-
-  const normalized = text
-    .replace(/[′’]/g, "'")
-    .replace(/[º]/g, "°")
-    .replace(/\s+/g, "");
-
-  const angleMatch = normalized.match(/^([+-]?)(\d+(?:\.\d+)?)°(\d+(?:\.\d+)?)'?$/);
-  if (angleMatch) {
-    const sign = angleMatch[1] === "-" ? -1 : 1;
-    const degrees = Number(angleMatch[2]);
-    const minutes = Number(angleMatch[3]);
-    if (Number.isFinite(degrees) && Number.isFinite(minutes)) {
-      return sign * (degrees * 60 + minutes);
-    }
-  }
-
-  const compactMatch = normalized.match(/^([+-]?)(\d+):(\d+(?:\.\d+)?)$/);
-  if (compactMatch) {
-    const sign = compactMatch[1] === "-" ? -1 : 1;
-    const degrees = Number(compactMatch[2]);
-    const minutes = Number(compactMatch[3]);
-    if (Number.isFinite(degrees) && Number.isFinite(minutes)) {
-      return sign * (degrees * 60 + minutes);
-    }
-  }
-
-  const rawMinutes = Number(normalized.replace(/'/g, ""));
-  return Number.isFinite(rawMinutes) ? rawMinutes : null;
+function getAngleControl(id) {
+  return {
+    sign: document.getElementById(`${id}Sign`),
+    degrees: document.getElementById(`${id}Deg`),
+    minutes: document.getElementById(`${id}Min`),
+  };
 }
 
-function normalizeAngleInput(element) {
-  const minutes = parseAngle(element.value);
-  if (minutes !== null) {
-    element.value = fmt(minutes);
+function readNumericPart(element) {
+  if (!element.value.trim()) return null;
+  const value = Number(element.value);
+  return Number.isFinite(value) ? value : null;
+}
+
+function readCalculatorInput(control) {
+  const degrees = readNumericPart(control.degrees);
+  const minutes = readNumericPart(control.minutes);
+  if (degrees === null || minutes === null) return null;
+  const sign = Number(control.sign.value) < 0 ? -1 : 1;
+  return sign * (Math.abs(degrees) * 60 + Math.abs(minutes));
+}
+
+function normalizeAngleControl(control) {
+  const value = readCalculatorInput(control);
+  if (value === null) return;
+  const sign = value < 0 ? -1 : 1;
+  const absolute = Math.abs(Math.round(value));
+  control.sign.value = String(sign);
+  control.degrees.value = String(Math.floor(absolute / 60));
+  control.minutes.value = String(absolute % 60);
+}
+
+function angleControlElements(control) {
+  return [control.sign, control.degrees, control.minutes];
+}
+
+function addAngleControlListeners(control) {
+  for (const element of angleControlElements(control)) {
+    element.addEventListener("input", updateCalculator);
+    element.addEventListener("blur", () => {
+      normalizeAngleControl(control);
+      updateCalculator();
+    });
   }
 }
 
@@ -187,10 +193,6 @@ function computeModel(s) {
   };
 }
 
-function readCalculatorInput(element) {
-  return parseAngle(element.value);
-}
-
 function setCalculatorOutputs(values) {
   for (const [key, value] of Object.entries(values)) {
     calculatorOutputs[key].textContent = value;
@@ -223,7 +225,7 @@ function updateCalculator() {
       deltaRL: "-",
       deltaRR: "-",
     });
-    calculatorOutputs.status.textContent = "Complete all fields as x°xx' values to calculate toe targets.";
+    calculatorOutputs.status.textContent = "Complete sign, degree, and minute fields to calculate toe targets.";
     return;
   }
 
@@ -616,12 +618,8 @@ window.addEventListener("resize", () => {
   drawCamber();
 });
 
-for (const input of Object.values(calculatorInputs)) {
-  input.addEventListener("input", updateCalculator);
-  input.addEventListener("blur", () => {
-    normalizeAngleInput(input);
-    updateCalculator();
-  });
+for (const control of Object.values(calculatorInputs)) {
+  addAngleControlListeners(control);
 }
 
 const customOption = document.createElement("option");
