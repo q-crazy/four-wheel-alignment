@@ -213,66 +213,150 @@
           <div class="calc-inputs" aria-label="Measured alignment inputs">
             <fieldset>
               <legend>Front caster</legend>
-              <label>
+              <div class="angle-field">
                 <span>FL caster</span>
-                <input id="calcCasterFL" class="angle-input" type="text" inputmode="text" value="7°00'" />
-              </label>
-              <label>
+                <div class="angle-control" data-angle="calcCasterFL">
+                  <select id="calcCasterFLSign" aria-label="FL caster sign">
+                    <option value="1" selected>+</option>
+                    <option value="-1">-</option>
+                  </select>
+                  <label><input id="calcCasterFLDeg" type="number" min="0" step="1" value="7" /><b>°</b></label>
+                  <label><input id="calcCasterFLMin" type="number" min="0" max="59" step="1" value="0" /><b>'</b></label>
+                </div>
+              </div>
+              <div class="angle-field">
                 <span>FR caster</span>
-                <input id="calcCasterFR" class="angle-input" type="text" inputmode="text" value="6°58'" />
-              </label>
+                <div class="angle-control" data-angle="calcCasterFR">
+                  <select id="calcCasterFRSign" aria-label="FR caster sign">
+                    <option value="1" selected>+</option>
+                    <option value="-1">-</option>
+                  </select>
+                  <label><input id="calcCasterFRDeg" type="number" min="0" step="1" value="6" /><b>°</b></label>
+                  <label><input id="calcCasterFRMin" type="number" min="0" max="59" step="1" value="58" /><b>'</b></label>
+                </div>
+              </div>
             </fieldset>
 
             <fieldset>
               <legend>Measured camber</legend>
-              <label>
+              <div class="angle-field">
                 <span>FL camber</span>
-                <input id="calcCamberFL" class="angle-input" type="text" inputmode="text" value="-0°38'" />
-              </label>
-              <label>
+                <div class="angle-control" data-angle="calcCamberFL">
+                  <select id="calcCamberFLSign" aria-label="FL camber sign">
+                    <option value="1">+</option>
+                    <option value="-1" selected>-</option>
+                  </select>
+                  <label><input id="calcCamberFLDeg" type="number" min="0" step="1" value="0" /><b>°</b></label>
+                  <label><input id="calcCamberFLMin" type="number" min="0" max="59" step="1" value="38" /><b>'</b></label>
+                </div>
+              </div>
+              <div class="angle-field">
                 <span>FR camber</span>
-                <input id="calcCamberFR" class="angle-input" type="text" inputmode="text" value="-1°02'" />
-              </label>
-              <label>
+                <div class="angle-control" data-angle="calcCamberFR">
+                  <select id="calcCamberFRSign" aria-label="FR camber sign">
+                    <option value="1">+</option>
+                    <option value="-1" selected>-</option>
+                  </select>
+                  <label><input id="calcCamberFRDeg" type="number" min="0" step="1" value="1" /><b>°</b></label>
+                  <label><input id="calcCamberFRMin" type="number" min="0" max="59" step="1" value="2" /><b>'</b></label>
+                </div>
+              </div>
+              <div class="angle-field">
                 <span>RL camber</span>
-                <input id="calcCamberRL" class="angle-input" type="text" inputmode="text" value="-0°51'" />
-              </label>
-              <label>
+                <div class="angle-control" data-angle="calcCamberRL">
+                  <select id="calcCamberRLSign" aria-label="RL camber sign">
+                    <option value="1">+</option>
+                    <option value="-1" selected>-</option>
+                  </select>
+                  <label><input id="calcCamberRLDeg" type="number" min="0" step="1" value="0" /><b>°</b></label>
+                  <label><input id="calcCamberRLMin" type="number" min="0" max="59" step="1" value="51" /><b>'</b></label>
+                </div>
+              </div>
+              <div class="angle-field">
                 <span>RR camber</span>
-                <input id="calcCamberRR" class="angle-input" type="text" inputmode="text" value="-0°59'" />
-              </label>
+                <div class="angle-control" data-angle="calcCamberRR">
+                  <select id="calcCamberRRSign" aria-label="RR camber sign">
+                    <option value="1">+</option>
+                    <option value="-1" selected>-</option>
+                  </select>
+                  <label><input id="calcCamberRRDeg" type="number" min="0" step="1" value="0" /><b>°</b></label>
+                  <label><input id="calcCamberRRMin" type="number" min="0" max="59" step="1" value="59" /><b>'</b></label>
+                </div>
+              </div>
             </fieldset>
 
             <fieldset>
               <legend>Measured toe</legend>
-              <label>
+              <div class="angle-field">
                 <span>FL toe</span>
-                <input id="calcToeFL" class="angle-input" type="text" inputmode="text" value="0°08'" />
-              </label>
-              <label>
+                <div class="angle-control" data-angle="calcToeFL">
+                  <select id="calcToeFLSign" aria-label="FL toe sign">
+                    <option value="1" selected>+</option>
+                    <option value="-1">-</option>
+                  </select>
+                  <label><input id="calcToeFLDeg" type="number" min="0" step="1" value="0" /><b>°</b></label>
+                  <label><input id="calcToeFLMin" type="number" min="0" max="59" step="1" value="8" /><b>'</b></label>
+                </div>
+              </div>
+              <div class="angle-field">
                 <span>FR toe</span>
-                <input id="calcToeFR" class="angle-input" type="text" inputmode="text" value="-0°02'" />
-              </label>
-              <label>
+                <div class="angle-control" data-angle="calcToeFR">
+                  <select id="calcToeFRSign" aria-label="FR toe sign">
+                    <option value="1">+</option>
+                    <option value="-1" selected>-</option>
+                  </select>
+                  <label><input id="calcToeFRDeg" type="number" min="0" step="1" value="0" /><b>°</b></label>
+                  <label><input id="calcToeFRMin" type="number" min="0" max="59" step="1" value="2" /><b>'</b></label>
+                </div>
+              </div>
+              <div class="angle-field">
                 <span>RL toe</span>
-                <input id="calcToeRL" class="angle-input" type="text" inputmode="text" value="0°07'" />
-              </label>
-              <label>
+                <div class="angle-control" data-angle="calcToeRL">
+                  <select id="calcToeRLSign" aria-label="RL toe sign">
+                    <option value="1" selected>+</option>
+                    <option value="-1">-</option>
+                  </select>
+                  <label><input id="calcToeRLDeg" type="number" min="0" step="1" value="0" /><b>°</b></label>
+                  <label><input id="calcToeRLMin" type="number" min="0" max="59" step="1" value="7" /><b>'</b></label>
+                </div>
+              </div>
+              <div class="angle-field">
                 <span>RR toe</span>
-                <input id="calcToeRR" class="angle-input" type="text" inputmode="text" value="0°04'" />
-              </label>
+                <div class="angle-control" data-angle="calcToeRR">
+                  <select id="calcToeRRSign" aria-label="RR toe sign">
+                    <option value="1" selected>+</option>
+                    <option value="-1">-</option>
+                  </select>
+                  <label><input id="calcToeRRDeg" type="number" min="0" step="1" value="0" /><b>°</b></label>
+                  <label><input id="calcToeRRMin" type="number" min="0" max="59" step="1" value="4" /><b>'</b></label>
+                </div>
+              </div>
             </fieldset>
 
             <fieldset>
               <legend>Target total toe</legend>
-              <label>
+              <div class="angle-field">
                 <span>Front total</span>
-                <input id="calcTargetFront" class="angle-input" type="text" inputmode="text" value="0°06'" />
-              </label>
-              <label>
+                <div class="angle-control" data-angle="calcTargetFront">
+                  <select id="calcTargetFrontSign" aria-label="Front total toe sign">
+                    <option value="1" selected>+</option>
+                    <option value="-1">-</option>
+                  </select>
+                  <label><input id="calcTargetFrontDeg" type="number" min="0" step="1" value="0" /><b>°</b></label>
+                  <label><input id="calcTargetFrontMin" type="number" min="0" max="59" step="1" value="6" /><b>'</b></label>
+                </div>
+              </div>
+              <div class="angle-field">
                 <span>Rear total</span>
-                <input id="calcTargetRear" class="angle-input" type="text" inputmode="text" value="0°11'" />
-              </label>
+                <div class="angle-control" data-angle="calcTargetRear">
+                  <select id="calcTargetRearSign" aria-label="Rear total toe sign">
+                    <option value="1" selected>+</option>
+                    <option value="-1">-</option>
+                  </select>
+                  <label><input id="calcTargetRearDeg" type="number" min="0" step="1" value="0" /><b>°</b></label>
+                  <label><input id="calcTargetRearMin" type="number" min="0" max="59" step="1" value="11" /><b>'</b></label>
+                </div>
+              </div>
             </fieldset>
           </div>
 
